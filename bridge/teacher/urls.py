@@ -18,8 +18,5 @@ from django.urls import path, include
 from bridge import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('stu/', include('bridge.stu.urls')),
-    path('teacher/', include('bridge.teacher.urls')),
-    path('adm/', include('bridge.adm.urls')),
+    
 ]
