@@ -16,7 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from bridge import views
+from bridge.adm import views as adm_views
 
 urlpatterns = [
-    
+    path('login/', adm_views.login),
+    path('register/', adm_views.register),
+    path('modify/', adm_views.modify),
+
 ]

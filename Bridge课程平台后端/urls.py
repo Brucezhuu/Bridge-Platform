@@ -22,4 +22,6 @@ urlpatterns = [
     path('stu/', include('bridge.stu.urls')),
     path('teacher/', include('bridge.teacher.urls')),
     path('adm/', include('bridge.adm.urls')),
+    path('show/', views.showAllCourse),
+    path('search/', views.searchByName),
 ]
