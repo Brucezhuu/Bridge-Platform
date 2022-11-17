@@ -108,7 +108,7 @@ def modify(request):
     stu_id = info.get('stu_id')
     md.stu.objects.filter(stu_id=stu_id).update(stu_name=info.get('stu_name'), stu_password=info.get('stu_password'),
                                                 depart=info.get('depart'), email=info.get('email'),
-                                                phone=info.get('info'))
+                                                phone=info.get('phone'))
     return JsonResponse({'code': 210, 'prompt': "修改成功！"})
 
 
