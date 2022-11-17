@@ -59,7 +59,7 @@ def register(request):
         password_1 = json_obj.get('stu_password_1')
         password_2 = json_obj.get('stu_password_2')
         if not Id:
-            result = {'code': 10101, 'error': 'Please give me username'}
+            result = {'code': 10101, 'error': 'Please give me Id'}
             return JsonResponse(result)
         if not email:
             result = {'code': 10102, 'error': 'Please give me email'}
@@ -93,9 +93,16 @@ def register(request):
         token = myJWT.make_token(Id)
         result = {'code': 200, 'stu_id': Id, 'data': {'token': token.decode()}}
         return JsonResponse(result)
-    else :
+    else:
         res = {'code': 210, 'prompt': "请求方式应为POST"}
         return JsonResponse(res)
 
+
 @csrf_exempt
 def modify(request):
+    info = request.POST.get('info')
+    stu_id = info.get('stu_id')
+    md.stu.objects.filter(stu_id=stu_id).update(stu_name=info.get('stu_name'), stu_password=info.get('stu_password'),
+                                                depart=info.get('depart'), email=info.get('email'),
+                                                phone=info.get('info'))
+    return JsonResponse({'code': 210, 'prompt': "修改成功！"})

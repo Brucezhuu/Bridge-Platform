@@ -93,9 +93,17 @@ def register(request):
         token = myJWT.make_token(Id)
         result = {'code': 200, 'adm_id': Id, 'data': {'token': token.decode()}}
         return JsonResponse(result)
-    else :
+    else:
         res = {'code': 210, 'prompt': "请求方式应为POST"}
         return JsonResponse(res)
 
+
 @csrf_exempt
 def modify(request):
+    info = request.POST.get('info')
+    adm_id = info.get('adm_id')
+    md.adm.objects.filter(adm_id=adm_id).update(adm_name=info.get('adm_name'),
+                                                adm_password=info.get('adm_password'),
+                                                depart=info.get('depart'), email=info.get('email'),
+                                                phone=info.get('info'))
+    return JsonResponse({'code': 210, 'prompt': "修改成功！"})

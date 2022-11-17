@@ -100,3 +100,10 @@ def register(request):
 
 @csrf_exempt
 def modify(request):
+    info = request.POST.get('info')
+    teacher_id = info.get('teacher_id')
+    md.teacher.objects.filter(teacher_id=teacher_id).update(teacher_name=info.get('teacher_name'),
+                                                            teacher_password=info.get('teacher_password'),
+                                                            depart=info.get('depart'), email=info.get('email'),
+                                                            phone=info.get('info'))
+    return JsonResponse({'code': 210, 'prompt': "修改成功！"})

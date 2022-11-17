@@ -9,6 +9,7 @@ class stu(models.Model):
     depart = models.CharField(max_length=30, blank=True, null=True)
     email = models.EmailField(max_length=127, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
+    message = models.CharField(max_length=50, blank=True, null=True)
 
 
 class teacher(models.Model):
@@ -18,6 +19,7 @@ class teacher(models.Model):
     depart = models.CharField(max_length=30, blank=True, null=True)
     email = models.EmailField(max_length=127, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
+    message = models.CharField(max_length=50, blank=True, null=True)
 
 
 class adm(models.Model):
@@ -27,6 +29,7 @@ class adm(models.Model):
     depart = models.CharField(max_length=30, blank=True, null=True)
     email = models.EmailField(max_length=127, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
+    message = models.CharField(max_length=50, blank=True, null=True)
 
 
 class course(models.Model):
