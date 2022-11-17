@@ -33,7 +33,7 @@ def login(request):
             return JsonResponse(res)
 
         token = myJWT.make_token(stu_id)
-        res = {'code': 200, 'prompt': "登录成功！", 'data': {'token': token.decode()}}
+        res = {'code': 200, 'prompt': "登录成功！", 'data': {'token': token}}
         return JsonResponse(res)
     else:
         res = {'code': 210, 'prompt': "请求方式应为POST"}
@@ -56,6 +56,7 @@ def register(request):
 
         Id = json_obj.get('stu_id')
         email = json_obj.get('email')
+        name = json_obj.get('stu_realName')
         password_1 = json_obj.get('stu_password_1')
         password_2 = json_obj.get('stu_password_2')
         if not Id:
@@ -64,7 +65,9 @@ def register(request):
         if not email:
             result = {'code': 10102, 'error': 'Please give me email'}
             return JsonResponse(result)
-
+        if not name:
+            result = {'code': 10106, 'error': 'Please give me realName'}
+            return JsonResponse(result)
         if not password_1 or not password_2:
             result = {'code': 10103, 'error': 'Please give me password'}
             return JsonResponse(result)
@@ -83,7 +86,7 @@ def register(request):
 
         # 创建用户
         try:
-            md.stu.objects.create(stu_id=Id, stu_password=password_2, email=email)
+            md.stu.objects.create(stu_id=Id, stu_password=password_2, email=email, stu_name=name)
         except Exception as e:
             print(e)
             result = {'code': 10106, 'error': 'The stu_id is already used!'}
@@ -91,7 +94,7 @@ def register(request):
 
         # todo 生成token
         token = myJWT.make_token(Id)
-        result = {'code': 200, 'stu_id': Id, 'data': {'token': token.decode()}}
+        result = {'code': 200, 'stu_id': Id, 'data': {'token': token}}
         return JsonResponse(result)
     else:
         res = {'code': 210, 'prompt': "请求方式应为POST"}
@@ -156,6 +159,7 @@ def getinfo(request):
     res = {"stu_id": stu_id, "stu_password": stu_password, "stu_name": stu_name,
            "depart": depart, "email": email, "phone": phone, "message": message}
     return JsonResponse(res)
+
 
 @csrf_exempt
 def myCourse(request):
