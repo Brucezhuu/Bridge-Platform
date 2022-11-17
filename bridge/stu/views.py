@@ -151,6 +151,7 @@ def getinfo(request):
     info = json.loads(request.body)
     stu_id = info.get('stu_id')
     stu = md.stu.objects.filter(stu_id=stu_id)
+    stu_id = stu.stu_id
     stu_password = stu.stu_password
     stu_name = stu.stu_name
     depart = stu.depart
