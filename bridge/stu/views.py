@@ -106,3 +106,26 @@ def modify(request):
                                                 depart=info.get('depart'), email=info.get('email'),
                                                 phone=info.get('info'))
     return JsonResponse({'code': 210, 'prompt': "修改成功！"})
+
+@csrf_exempt
+def add(request):
+    info = request.POST.get('info')
+    stu_id = info.get('stu_id')
+    course_id = info.get('course_id')
+    exist = md.stu_course.objects.filter(stu_id=stu_id, course_id=course_id)
+    if exist:
+        res = {'code': 1, "prompt": "已存在此选课记录！"}
+        return JsonResponse(res)
+    course_capacity = md.course.objects.filter(course_id=course_id).course_capacity
+    course_total = md.course.objects.filter(course_id=course_id).course_total
+    if course_total < course_capacity:
+        md.stu_course.objects.create(stu_id=stu_id, course_id=course_id)
+        course_total = course_total + 1
+        md.course.objects.filter(course_id=course_id).update(course_total=course_total)
+        res = {'code': 0, "prompt": "选课成功！"}
+        return JsonResponse(res)
+    else:
+        res = {'code': 2, "prompt": "课程容量已满，不能再选此课程！"}
+        return JsonResponse(res)
+
+
