@@ -65,9 +65,7 @@ def register(request):
         if not email:
             result = {'code': 10102, 'error': 'Please give me email'}
             return JsonResponse(result)
-        if not name:
-            result = {'code': 10106, 'error': 'Please give me realName'}
-            return JsonResponse(result)
+
         if not password_1 or not password_2:
             result = {'code': 10103, 'error': 'Please give me password'}
             return JsonResponse(result)
@@ -79,6 +77,9 @@ def register(request):
         old_user = md.stu.objects.filter(stu_id=Id)
         if old_user:
             result = {'code': 10105, 'error': 'The stu_id is already existed!'}
+            return JsonResponse(result)
+        if not name:
+            result = {'code': 10106, 'error': 'Please give me realName'}
             return JsonResponse(result)
         # # 密码进行哈希　－　md5
         # p_m = hashlib.md5()
