@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-dd)%n&m#lc4ni34ju+za1zhj(h7!oqq46s8*@fxj3z2-wb7ebb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -137,7 +137,7 @@ CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie，前端需要携带cookies�
 
 # 1、CSRF_TRUSTED_ORIGINS  设置
 CORS_ORIGIN_WHITELIST = [
-
+    'http://127.0.0.1:8080', 'http://localhost:8080'
 ]  # 不需要CORS_ORIGIN_ALLOW_ALL=True的设置
 CSRF_TRUSTED_ORIGINS = [
 

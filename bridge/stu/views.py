@@ -100,16 +100,17 @@ def register(request):
 
 @csrf_exempt
 def modify(request):
-    info = request.POST.get('info')
+    info = json.loads(request.body)
     stu_id = info.get('stu_id')
     md.stu.objects.filter(stu_id=stu_id).update(stu_name=info.get('stu_name'), stu_password=info.get('stu_password'),
                                                 depart=info.get('depart'), email=info.get('email'),
                                                 phone=info.get('info'))
     return JsonResponse({'code': 210, 'prompt': "修改成功！"})
 
+
 @csrf_exempt
 def add(request):
-    info = request.POST.get('info')
+    info = json.loads(request.body)
     stu_id = info.get('stu_id')
     course_id = info.get('course_id')
     exist = md.stu_course.objects.filter(stu_id=stu_id, course_id=course_id)
@@ -129,3 +130,48 @@ def add(request):
         return JsonResponse(res)
 
 
+@csrf_exempt
+def delete(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    course_id = info.get('course_id')
+    md.stu_course.objects.filter(stu_id=stu_id, course_id=course_id).delete()
+    course_total = md.course.objects.filter(course_id=course_id).course_total - 1
+    md.course.objects.filter(course_id=course_id).update(course_total=course_total)
+    res = {'code': 0, "prompt": "退课成功！"}
+    return JsonResponse(res)
+
+
+@csrf_exempt
+def getinfo(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    stu = md.stu.objects.filter(stu_id=stu_id)
+    stu_password = stu.stu_password
+    stu_name = stu.stu_name
+    depart = stu.depart
+    email = stu.email
+    phone = stu.phone
+    message = stu.message
+    res = {"stu_id": stu_id, "stu_password": stu_password, "stu_name": stu_name,
+           "depart": depart, "email": email, "phone": phone, "message": message}
+    return JsonResponse(res)
+
+@csrf_exempt
+def myCourse(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    courses = md.stu_course.objects.filter(stu_id=stu_id)
+    data = []
+    for obj in courses:
+        course_id = obj.course_id
+        course_name = obj.course_name
+        course_intro = obj.course_intro
+        course_rate = obj.course_rate
+        course_total = obj.course_total
+        course_capacity = obj.course_capacity
+        data.append({"course_id": course_id, "course_name": course_name, "course_intro": course_intro,
+                     "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
+    if len(data) == 0:
+        return JsonResponse({'code': 1, "data": None, "message": "没有课程"})
+    return JsonResponse({'code': 0, "data": data, "message": "查找到所有课程"})

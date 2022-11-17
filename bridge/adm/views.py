@@ -100,7 +100,7 @@ def register(request):
 
 @csrf_exempt
 def modify(request):
-    info = request.POST.get('info')
+    info = json.loads(request.body)
     adm_id = info.get('adm_id')
     md.adm.objects.filter(adm_id=adm_id).update(adm_name=info.get('adm_name'),
                                                 adm_password=info.get('adm_password'),
