@@ -54,17 +54,21 @@ def register(request):
             result = {'code': 10100, 'error': 'Please give me data'}
             return JsonResponse(result)
         json_obj = json.loads(json_str)
-
+        print(json_obj)
         Id = json_obj.get('stu_id')
         email = json_obj.get('email')
         password_1 = json_obj.get('stu_password1')
         password_2 = json_obj.get('stu_password2')
+        stu_name = json_obj.get('stu_realName')
         if not Id:
             result = {'code': 10101, 'error': 'Please give me Id'}
             return JsonResponse(result)
 
         if not email:
             result = {'code': 10102, 'error': 'Please give me email'}
+            return JsonResponse(result)
+        if not stu_name:
+            result = {'code': 10106, 'error': 'Please give me email'}
             return JsonResponse(result)
 
         if not password_1 or not password_2:
@@ -85,7 +89,7 @@ def register(request):
 
         # 创建用户
         try:
-            md.stu.objects.create(stu_id=Id, stu_password=password_2, email=email)
+            md.stu.objects.create(stu_id=Id, stu_password=password_2, email=email, stu_name=stu_name)
         except Exception as e:
             print(e)
             result = {'code': 10106, 'error': 'The stu_id is already used!'}
@@ -113,14 +117,16 @@ def modify(request):
 @csrf_exempt
 def add(request):
     info = json.loads(request.body)
-    stu_id = info.get('stu_id')
-    course_id = info.get('course_id')
+    stu_id = info.get('username')
+    course = info.get('data')
+    course_id = course['course_id']
     exist = md.stu_course.objects.filter(stu_id=stu_id, course_id=course_id)
     if exist:
         res = {'code': 1, "prompt": "已存在此选课记录！"}
         return JsonResponse(res)
-    course_capacity = md.course.objects.filter(course_id=course_id).course_capacity
-    course_total = md.course.objects.filter(course_id=course_id).course_total
+    course = md.course.objects.filter(course_id=course_id).first()
+    course_capacity = course.course_capacity
+    course_total = course.course_total
     if course_total < course_capacity:
         md.stu_course.objects.create(stu_id=stu_id, course_id=course_id)
         course_total = course_total + 1
@@ -135,11 +141,11 @@ def add(request):
 @csrf_exempt
 def delete(request):
     info = json.loads(request.body)
-    stu_id = info.get('stu_id')
-    course_id = info.get('course_id')
-    md.stu_course.objects.filter(stu_id=stu_id, course_id=course_id).delete()
-    course_total = md.course.objects.filter(course_id=course_id).course_total - 1
-    md.course.objects.filter(course_id=course_id).update(course_total=course_total)
+    stu_id = info.get('username')
+    course = info.get('course')
+    md.stu_course.objects.filter(stu_id=stu_id, course_id=course['course_id']).delete()
+    course_total = md.course.objects.filter(course_id=course['course_id']).first().course_total - 1
+    md.course.objects.filter(course_id=course['course_id']).update(course_total=course_total)
     res = {'code': 0, "prompt": "退课成功！"}
     return JsonResponse(res)
 
@@ -157,6 +163,7 @@ def getinfo(request):
     message = stu.message
     res = {"stu_id": stu_id, "stu_password": stu_password, "stu_name": stu_name,
            "depart": depart, "email": email, "phone": phone, "message": message}
+    print(res)
     return JsonResponse(res)
 
 @csrf_exempt
@@ -164,9 +171,12 @@ def myCourse(request):
     info = json.loads(request.body)
     stu_id = info.get('stu_id')
     courses = md.stu_course.objects.filter(stu_id=stu_id)
+    course_ids = []
+    for s_c in courses:
+        course_ids.append(s_c.course_id)
     data = []
-    for obj in courses:
-        course_id = obj.course_id
+    for course_id in course_ids:
+        obj = md.course.objects.filter(course_id=course_id).first()
         course_name = obj.course_name
         course_intro = obj.course_intro
         course_rate = obj.course_rate
@@ -174,6 +184,7 @@ def myCourse(request):
         course_capacity = obj.course_capacity
         data.append({"course_id": course_id, "course_name": course_name, "course_intro": course_intro,
                      "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
+
     if len(data) == 0:
         return JsonResponse({'code': 1, "data": [], "message": "没有课程"})
     return JsonResponse({'code': 0, "data": data, "message": "查找到所有课程"})

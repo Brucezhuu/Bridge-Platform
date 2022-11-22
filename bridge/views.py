@@ -19,8 +19,8 @@ def showAllCourse(request):
         data.append({"course_id": course_id, "course_name": course_name, "course_intro": course_intro,
                      "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
     if len(data) == 0:
-        return JsonResponse({"data": [], "message": "没有课程"})
-    return JsonResponse({"data": data, "message": "查找到所有课程"})
+        return JsonResponse({"data": [], "message": "没有课程", 'code': 1})
+    return JsonResponse({"data": data, "message": "查找到所有课程", 'code': 0})
 
 
 @csrf_exempt
