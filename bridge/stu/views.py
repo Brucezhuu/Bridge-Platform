@@ -34,6 +34,7 @@ def login(request):
 
         token = myJWT.make_token(stu_id)
         res = {'code': 200, 'prompt': "登录成功！", 'data': {'token': token}}
+        # res = {'code': 200, 'prompt': "登录成功！"}
         return JsonResponse(res)
     else:
         res = {'code': 210, 'prompt': "请求方式应为POST"}
@@ -56,12 +57,12 @@ def register(request):
 
         Id = json_obj.get('stu_id')
         email = json_obj.get('email')
-        name = json_obj.get('stu_realName')
-        password_1 = json_obj.get('stu_password_1')
-        password_2 = json_obj.get('stu_password_2')
+        password_1 = json_obj.get('stu_password1')
+        password_2 = json_obj.get('stu_password2')
         if not Id:
             result = {'code': 10101, 'error': 'Please give me Id'}
             return JsonResponse(result)
+
         if not email:
             result = {'code': 10102, 'error': 'Please give me email'}
             return JsonResponse(result)
@@ -78,16 +79,13 @@ def register(request):
         if old_user:
             result = {'code': 10105, 'error': 'The stu_id is already existed!'}
             return JsonResponse(result)
-        if not name:
-            result = {'code': 10106, 'error': 'Please give me realName'}
-            return JsonResponse(result)
         # # 密码进行哈希　－　md5
         # p_m = hashlib.md5()
         # p_m.update(password_1.encode())
 
         # 创建用户
         try:
-            md.stu.objects.create(stu_id=Id, stu_password=password_2, email=email, stu_name=name)
+            md.stu.objects.create(stu_id=Id, stu_password=password_2, email=email)
         except Exception as e:
             print(e)
             result = {'code': 10106, 'error': 'The stu_id is already used!'}
@@ -150,8 +148,7 @@ def delete(request):
 def getinfo(request):
     info = json.loads(request.body)
     stu_id = info.get('stu_id')
-    stu = md.stu.objects.filter(stu_id=stu_id)
-    stu_id = stu.stu_id
+    stu = md.stu.objects.filter(stu_id=stu_id).first()
     stu_password = stu.stu_password
     stu_name = stu.stu_name
     depart = stu.depart
@@ -161,7 +158,6 @@ def getinfo(request):
     res = {"stu_id": stu_id, "stu_password": stu_password, "stu_name": stu_name,
            "depart": depart, "email": email, "phone": phone, "message": message}
     return JsonResponse(res)
-
 
 @csrf_exempt
 def myCourse(request):
@@ -179,5 +175,5 @@ def myCourse(request):
         data.append({"course_id": course_id, "course_name": course_name, "course_intro": course_intro,
                      "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
     if len(data) == 0:
-        return JsonResponse({'code': 1, "data": None, "message": "没有课程"})
+        return JsonResponse({'code': 1, "data": [], "message": "没有课程"})
     return JsonResponse({'code': 0, "data": data, "message": "查找到所有课程"})
