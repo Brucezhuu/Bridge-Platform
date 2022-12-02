@@ -166,6 +166,7 @@ def getinfo(request):
     print(res)
     return JsonResponse(res)
 
+
 @csrf_exempt
 def myCourse(request):
     info = json.loads(request.body)
