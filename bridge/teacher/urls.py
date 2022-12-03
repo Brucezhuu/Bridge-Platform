@@ -22,5 +22,15 @@ urlpatterns = [
     path('login/', teacher_views.login),
     path('register/', teacher_views.register),
     path('modify/', teacher_views.modify),
+    path('add/', teacher_views.add),
+    path('getinfo/', teacher_views.getinfo),
+    path('mycourse/', teacher_views.myCourse),
+    path('rmcourse/', teacher_views.delete),
+    path('changepasswd/', teacher_views.changePasswd),
+    path('addmaterial/', teacher_views.addMaterial),
+    path('newthemepost/', teacher_views.newThemePost),
+    path('deletethemepost/', teacher_views.deleteThemePost),
+    path('newfollowpost/', teacher_views.newFollowPost),
+    path('deletefollowpost/', teacher_views.deleteFollowPost),
 
 ]

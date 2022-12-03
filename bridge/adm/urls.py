@@ -22,5 +22,13 @@ urlpatterns = [
     path('login/', adm_views.login),
     path('register/', adm_views.register),
     path('modify/', adm_views.modify),
-
+    path('add/', adm_views.add),
+    path('getinfo/', adm_views.getinfo),
+    path('rmcourse/', adm_views.delete),
+    path('changepasswd/', adm_views.changePasswd),
+    path('addmaterial/', adm_views.addMaterial),
+    path('newthemepost/', adm_views.newThemePost),
+    path('deletethemepost/', adm_views.deleteThemePost),
+    path('newfollowpost/', adm_views.newFollowPost),
+    path('deletefollowpost/', adm_views.deleteFollowPost),
 ]

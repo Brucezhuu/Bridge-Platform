@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.shortcuts import render
@@ -6,8 +7,11 @@ from django.http import JsonResponse
 import bridge.models as md
 from bridge.tools import myJWT
 
-
 # Create your views here.
+comment_idx = 0
+tp_idx = 0
+fp_idx = 0
+
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
@@ -189,3 +193,129 @@ def myCourse(request):
     if len(data) == 0:
         return JsonResponse({'code': 1, "data": [], "message": "没有课程"})
     return JsonResponse({'code': 0, "data": data, "message": "查找到所有课程"})
+
+
+@csrf_exempt
+def changePasswd(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    old_passwd = info.get('old_password')
+    new_passwd1 = info.get('new_password1')
+    new_passwd2 = info.get('new_password2')
+    if not stu_id or not old_passwd or not new_passwd2 or not new_passwd1:
+        return JsonResponse({'code': 3, 'message': "所有字段必须填写！"})
+    stu = md.stu.objects.get(stu_id=stu_id)
+    if stu.stu_password != old_passwd:
+        return JsonResponse({'code': 1, "message": "请输入正确的用户名或密码！"})
+    if new_passwd1 != new_passwd2:
+        return JsonResponse({'code': 2, 'message': "两次输入的新密码不一致！"})
+    # stu.objects.update(stu_password=new_passwd2)
+    stu.stu_password = new_passwd2
+    return JsonResponse({"code": 0, 'message': "更改密码成功！"})
+
+
+@csrf_exempt
+def rateCourse(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    course_id = info.get('course_id')
+    score = info.get('score')
+    course = md.course.objects.get(course_id=course_id)
+    course.course_rate = course.rate + score / course.course_total
+    return JsonResponse({"code": 0, 'message': "评分成功！"})
+
+
+@csrf_exempt
+def makeComment(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    course_id = info.get('course_id')
+    comment_content = info.get('comment_content')
+    comment_time = datetime.datetime.now()
+    global comment_idx
+    comment_id = str(comment_idx + 1)
+    comment_idx = 1 + comment_idx
+    if not comment_content:
+        return JsonResponse({"code": 1, 'message': "评价内容不能为空"})
+    if len(comment_content) > 255:
+        return JsonResponse({"code": 2, 'message': "评价内容不能超过255个字符"})
+    md.comment.objects.create(comment_id=comment_id, comment_content=comment_content, comment_time=comment_time)
+    md.stu_comment.objects.create(stu_id=stu_id, comment_id=comment_id)
+    md.course_comment.objects.create(course_id=course_id, comment_id=comment_id)
+    return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_id})
+
+
+@csrf_exempt
+def delComment(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    course_id = info.get('course_id')
+    comment_id = info.get('comment_id')
+
+    md.comment.objects.filter(comment_id=comment_id).delete()
+    md.stu_comment.objects.filter(stu_id=stu_id, comment_id=comment_id).delete()
+    md.course_comment.objects.filter(course_id=course_id, comment_id=comment_id).delete()
+    return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
+
+@csrf_exempt
+def newThemePost(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    themePost = info.get('themepost')
+    global tp_idx
+    tp_id = str(tp_idx + 1)
+    tp_idx = tp_idx + 1
+    tp_title = themePost.tp_title
+    tp_content = themePost.tp_content
+    tp_time = datetime.datetime.now()
+    tp_isTeacher = False
+    if not tp_title:
+        return JsonResponse({"code": 1, 'message': "标题不能为空！"})
+    if len(tp_title) > 127:
+        return JsonResponse({"code": 2, 'message': "标题内容不能超过127个字符"})
+    if len(tp_content) > 512:
+        return JsonResponse({"code": 3, 'message': "帖子内容不能超过512个字符"})
+    md.themepost.objects.create(tp_id=tp_id, tp_title=tp_title, tp_content=tp_content, tp_time=tp_time, tp_isTeacher=tp_isTeacher)
+    md.stu_tp.objects.create(stu_id=stu_id, tp_id=tp_id)
+    return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': tp_id})
+@csrf_exempt
+def deleteThemePost(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    tp_id = info.get('tp_id')
+    md.themepost.objects.filter(tp_id=tp_id).delete()
+    md.stu_tp.objects.filter(tp_id=tp_id, stu_id=stu_id).delete()
+    return JsonResponse({"code": 0, 'prompt': "主题帖删除成功！"})
+@csrf_exempt
+def newFollowPost(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    tp_id = info.get('tp_id')
+    global fp_idx
+    fp_id = str(fp_idx + 1)
+    fp_idx = fp_idx + 1
+    fp_content = info.get('fp_content')
+    fp_time = datetime.datetime.now()
+    fp_isTeacher = False
+    if not fp_content:
+        return JsonResponse({"code": 1, 'message': "内容不能为空！"})
+    if len(fp_content) > 127:
+        return JsonResponse({"code": 3, 'message': "帖子内容不能超过127个字符"})
+    md.themepost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
+                                fp_isTeacher=fp_isTeacher)
+    md.stu_fp.objects.create(stu_id=stu_id, fp_id=fp_id)
+    md.tp_fp.objects.create(tp_id=tp_id, fp_id=fp_id)
+    return JsonResponse({"code": 0, 'prompt': "发表成功！", 'fp_id': fp_id})
+
+@csrf_exempt
+def deleteFollowPost(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    tp_id = info.get('tp_id')
+    fp_id = info.get('fp_id')
+    md.followpost.objects.filter(fp_id=fp_id).delete()
+    md.stu_fp.objects.filter(fp_id=fp_id,stu_id=stu_id).delete()
+    md.tp_fp.objects.filter(fp_id=fp_id, tp_id=tp_id).delete()
+    return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
+# if __name__ == '__main__':
+#     print(datetime.datetime.now())

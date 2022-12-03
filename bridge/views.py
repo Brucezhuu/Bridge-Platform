@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
@@ -38,5 +40,100 @@ def searchByName(request):
         data.append({"course_id": course_id, "course_name": course_name, "course_intro": course_intro,
                      "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
         if len(data) == 0:
-            return JsonResponse({"data": None, "message": "无此课程"})
-        return JsonResponse({"data": data, "message": "查找成功"})
+            return JsonResponse({"code": 1, "data": None, "message": "无此课程"})
+        return JsonResponse({"code": 0, "data": data, "message": "查找成功"})
+
+
+@csrf_exempt
+def showCourseComment(request):
+    info = json.loads(request)
+    course_id = info.get('course_id')
+    course_comments = model.course_comment.objects.filter(course_id=course_id)
+    data = []
+    comment_ids = []
+    for obj in course_comments:
+        comment_ids.append(obj.comment_id)
+    for comment_id in comment_ids:
+        comment = model.comment.objects.get(comment_id=comment_id)
+        data.append({"comment_id": comment_id, "comment_content": comment.comment_content,
+                     "comment_time": comment.comment_time})
+    if len(data) == 0:
+        return JsonResponse({"code": 1, "data": None, "message": "此课程暂无任何评价"})
+    return JsonResponse({"code": 0, "data": data, "message": "找到所有评价！"})
+
+
+@csrf_exempt
+def showAllTp(request):
+    allTp = model.themepost.objects.all()
+    data = []
+    for obj in allTp:
+        tp_id = obj.tp_id
+        tp_title = obj.tp_title
+        tp_content = obj.tp_content
+        tp_time = obj.tp_time
+        tp_isTeacher = obj.tp_isTeacher
+        data.append({"tp_id": tp_id, "tp_title": tp_title, "tp_content": tp_content, "tp_time": tp_time,
+                     "tp_isTeacher": tp_isTeacher})
+    if len(data) == 0:
+        return JsonResponse({"data": [], "message": "没有任何主题帖", 'code': 1})
+    return JsonResponse({"data": data, "message": "查找到所有主题帖", 'code': 0})
+
+
+@csrf_exempt
+def showAllFp(request):
+    info = json.loads(request.body)
+    tp_id = info.get('tp_id')
+    tp_fps = model.tp_fp.objects.filter(tp_id=tp_id)
+    fp_ids = []
+    data = []
+    for obj in tp_fps:
+        fp_ids.append(obj.fp_id)
+    for fp_id in fp_ids:
+        fp = model.followpost.objects.get(fp_id=fp_id)
+        stu_id = model.stu_fp.objects.get(fp_id=fp_id).stu_id
+        stu_name = model.stu.objects.get(stu_id=stu_id).stu_name
+        fp_content = fp.fp_content
+        fp_time = fp.fp_time
+        fp_isTeacher = fp.fp_isTeacher
+        data.append({"stu_id": stu_id, "stu_name": stu_name, "fp_content": fp_content, "fp_time": fp_time,
+                     "fp_isTeacher": fp_isTeacher})
+    if len(data) == 0:
+        return JsonResponse({"code": 1, "data": None, "message": "此主题帖暂无任何跟帖"})
+    return JsonResponse({"code": 0, "data": data, "message": "找到所有跟帖！"})
+
+
+@csrf_exempt
+def searchTp(request):
+    info = json.loads(request.body)
+    tp_title = info.get("tp_title")
+    tp = model.themepost.objects.filter(tp_title=tp_title)
+    data = []
+    for obj in tp:
+        tp_id = obj.tp_id
+        tp_title = obj.tp_title
+        tp_content = obj.tp_content
+        tp_time = obj.tp_time
+        tp_isTeacher = obj.tp_isTeacher
+        data.append({"tp_id": tp_id, "tp_title": tp_title, "tp_content": tp_content, "tp_time": tp_time,
+                     "tp_isTeacher": tp_isTeacher})
+    if len(data) == 0:
+        return JsonResponse({"data": [], "message": "没有找到任何主题帖", 'code': 1})
+    return JsonResponse({"data": data, "message": "查找到所有主题帖", 'code': 0})
+
+
+@csrf_exempt
+def showCourseMaterial(request):
+    info = json.loads(request.body)
+    course_id = info.get('course_id')
+    course_materials = model.course_material.objects.filter(course_id=course_id)
+    material_ids = []
+    for obj in course_materials:
+        material_ids.append(obj.material_id)
+    data = []
+    for material_id in material_ids:
+        material = model.material.objects.get(material_id=material_id)
+        data.append({"material_id": material_id, 'material_name': material.material_name,
+                     "material_intro": material.material_intro})
+    if len(data) == 0:
+        return JsonResponse({'data': None, 'code': 1, 'message': "该课程暂无任何课程资料！"})
+    return JsonResponse({'data': data, 'code': 0, 'message': '查找到该课程所有资料！'})

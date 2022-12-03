@@ -24,4 +24,10 @@ urlpatterns = [
     path('adm/', include('bridge.adm.urls')),
     path('show/', views.showAllCourse),
     path('search/', views.searchByName),
+    path('showcoursecomment/', views.showCourseComment),
+    path('showalltp/', views.showAllTp),
+    path('showallfp/', views.showAllFp),
+    path('searchtp/', views.searchTp),
+    path('showcoursematerial/', views.showCourseMaterial),
+
 ]
