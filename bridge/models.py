@@ -36,7 +36,7 @@ class course(models.Model):
     course_id = models.CharField(max_length=25, primary_key=True, unique=True)
     course_name = models.CharField(max_length=255)
     course_intro = models.CharField(max_length=520, blank=True, null=True)
-    course_rate = models.DecimalField(blank=True, null=True, default=0)
+    course_rate = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=0)
     course_total = models.IntegerField(blank=True, null=True, default=0)
     course_capacity = models.IntegerField(default=0)
 
