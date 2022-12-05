@@ -132,8 +132,8 @@ def add(request):
     course_capacity = course.course_capacity
     course_total = course.course_total
     if course_total < course_capacity:
-        stu = md.stu.objects.filter(stu_id=stu_id)
-        course = md.course.objects.filter(course_id=course_id)
+        stu = md.stu.objects.get(stu_id=stu_id)
+        course = md.course.objects.get(course_id=course_id)
         md.stu_course.objects.create(stu_id=stu, course_id=course)
         course_total = course_total + 1
         md.course.objects.filter(course_id=course_id).update(course_total=course_total)
@@ -290,6 +290,8 @@ def newThemePost(request):
     md.themepost.objects.create(tp_id=tp_id, tp_title=tp_title, tp_content=tp_content, tp_time=tp_time, tp_isTeacher=tp_isTeacher)
     tp_item = md.themepost.objects.get(tp_id=tp_id)
     md.stu_tp.objects.create(stu_id=stu_item, tp_id=tp_item)
+    postCnt = md.stu.objects.get(stu_id=stu_id).postCnt
+    md.stu.objects.filter(stu_id=stu_id).update(postCnt=postCnt + 1)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': tp_id})
 @csrf_exempt
 def deleteThemePost(request):

@@ -277,6 +277,8 @@ def newThemePost(request):
                                 tp_isTeacher=tp_isTeacher)
     tp_item = md.themepost.objects.get(tp_id=tp_id)
     md.teacher_tp.objects.create(teacher_id=teacher_item, tp_id=tp_item)
+    postCnt = md.teacher.objects.get(teacher_id=teacher_id).postCnt
+    md.teacher.objects.filter(teacher_id=teacher_id).update(postCnt=postCnt + 1)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': tp_id})
 
 

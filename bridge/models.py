@@ -10,6 +10,7 @@ class stu(models.Model):
     email = models.EmailField(max_length=127, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     message = models.CharField(max_length=50, blank=True, null=True)
+    postCnt = models.IntegerField(default=0, blank=True, null=True)
 
 
 class teacher(models.Model):
@@ -20,6 +21,7 @@ class teacher(models.Model):
     email = models.EmailField(max_length=127, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     message = models.CharField(max_length=50, blank=True, null=True)
+    postCnt = models.IntegerField(default=0, blank=True, null=True)
 
 
 class adm(models.Model):
@@ -30,6 +32,7 @@ class adm(models.Model):
     email = models.EmailField(max_length=127, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     message = models.CharField(max_length=50, blank=True, null=True)
+    postCnt = models.IntegerField(default=0, blank=True, null=True)
 
 
 class course(models.Model):

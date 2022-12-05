@@ -65,6 +65,14 @@ def showCourseComment(request):
 
 @csrf_exempt
 def showAllTp(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    if not stu_id:
+        return JsonResponse({'code': 2, 'message': '学生id为空，请先登陆'})
+    stu = model.stu.objects.get(stu_id=stu_id)
+    if not stu:
+        return JsonResponse({'code': 3, 'message': '无此学生，请先注册'})
+    postCnt = stu.postCnt
     allTp = model.themepost.objects.all()
     data = []
     for obj in allTp:
@@ -76,8 +84,8 @@ def showAllTp(request):
         data.append({"tp_id": tp_id, "tp_title": tp_title, "tp_content": tp_content, "tp_time": tp_time,
                      "tp_isTeacher": tp_isTeacher})
     if len(data) == 0:
-        return JsonResponse({"data": [], "message": "没有任何主题帖", 'code': 1})
-    return JsonResponse({"data": data, "message": "查找到所有主题帖", 'code': 0})
+        return JsonResponse({"data": [], "message": "没有任何主题帖", 'code': 1, 'postCnt': postCnt})
+    return JsonResponse({"data": data, "message": "查找到所有主题帖", 'code': 0, 'postCnt': postCnt})
 
 
 @csrf_exempt
