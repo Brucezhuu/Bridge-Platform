@@ -48,11 +48,12 @@ def searchByName(request):
 def showCourseComment(request):
     info = json.loads(request)
     course_id = info.get('course_id')
-    course_comments = model.course_comment.objects.filter(course_id=course_id)
+    course_item = model.course.objects.get(course_id=course_id)
+    course_comments = model.course_comment.objects.filter(course_id=course_item)
     data = []
     comment_ids = []
     for obj in course_comments:
-        comment_ids.append(obj.comment_id)
+        comment_ids.append(obj.comment_id.comment_id)
     for comment_id in comment_ids:
         comment = model.comment.objects.get(comment_id=comment_id)
         data.append({"comment_id": comment_id, "comment_content": comment.comment_content,
@@ -83,11 +84,12 @@ def showAllTp(request):
 def showAllFp(request):
     info = json.loads(request.body)
     tp_id = info.get('tp_id')
-    tp_fps = model.tp_fp.objects.filter(tp_id=tp_id)
+    tp_item = model.themepost.objects.get(tp_id=tp_id)
+    tp_fps = model.tp_fp.objects.filter(tp_id=tp_item)
     fp_ids = []
     data = []
     for obj in tp_fps:
-        fp_ids.append(obj.fp_id)
+        fp_ids.append(obj.fp_id.fp_id)
     for fp_id in fp_ids:
         fp = model.followpost.objects.get(fp_id=fp_id)
         stu_id = model.stu_fp.objects.get(fp_id=fp_id).stu_id
@@ -128,7 +130,7 @@ def showCourseMaterial(request):
     course_materials = model.course_material.objects.filter(course_id=course_id)
     material_ids = []
     for obj in course_materials:
-        material_ids.append(obj.material_id)
+        material_ids.append(obj.material_id.material_id)
     data = []
     for material_id in material_ids:
         material = model.material.objects.get(material_id=material_id)

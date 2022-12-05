@@ -177,10 +177,11 @@ def getinfo(request):
 
 @csrf_exempt
 def myCourse(request):
-    # info = json.loads(request.body)
-    # stu_id = info.get('stu_id')
-    stu_id = "21"
-    courses = md.stu_course.objects.filter(stu_id=stu_id)
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    # stu_id = "21"
+    stu_item = md.stu.objects.get(stu_id=stu_id)
+    courses = md.stu_course.objects.filter(stu_id=stu_item)
     course_ids = []
     for s_c in courses:
         course_ids.append(s_c.course_id.course_id)
