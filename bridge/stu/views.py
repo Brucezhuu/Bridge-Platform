@@ -132,7 +132,9 @@ def add(request):
     course_capacity = course.course_capacity
     course_total = course.course_total
     if course_total < course_capacity:
-        md.stu_course.objects.create(stu_id=stu_id, course_id=course_id)
+        stu = md.stu.objects.filter(stu_id=stu_id)
+        course = md.course.objects.filter(course_id=course_id)
+        md.stu_course.objects.create(stu_id=stu, course_id=course)
         course_total = course_total + 1
         md.course.objects.filter(course_id=course_id).update(course_total=course_total)
         res = {'code': 0, "prompt": "选课成功！"}
@@ -147,7 +149,9 @@ def delete(request):
     info = json.loads(request.body)
     stu_id = info.get('username')
     course = info.get('course')
-    md.stu_course.objects.filter(stu_id=stu_id, course_id=course['course_id']).delete()
+    stu_item = md.stu.objects.filter(stu_id=stu_id).first()
+    course_item = md.course.objects.filter(course_id=course['course_id']).first()
+    md.stu_course.objects.filter(stu_id=stu_item, course_id=course_item).delete()
     course_total = md.course.objects.filter(course_id=course['course_id']).first().course_total - 1
     md.course.objects.filter(course_id=course['course_id']).update(course_total=course_total)
     res = {'code': 0, "prompt": "退课成功！"}
@@ -173,15 +177,16 @@ def getinfo(request):
 
 @csrf_exempt
 def myCourse(request):
-    info = json.loads(request.body)
-    stu_id = info.get('stu_id')
+    # info = json.loads(request.body)
+    # stu_id = info.get('stu_id')
+    stu_id = "21"
     courses = md.stu_course.objects.filter(stu_id=stu_id)
     course_ids = []
     for s_c in courses:
-        course_ids.append(s_c.course_id)
+        course_ids.append(s_c.course_id.course_id)
     data = []
     for course_id in course_ids:
-        obj = md.course.objects.filter(course_id=course_id).first()
+        obj = md.course.objects.get(course_id=course_id)
         course_name = obj.course_name
         course_intro = obj.course_intro
         course_rate = obj.course_rate
@@ -240,8 +245,11 @@ def makeComment(request):
     if len(comment_content) > 255:
         return JsonResponse({"code": 2, 'message': "评价内容不能超过255个字符"})
     md.comment.objects.create(comment_id=comment_id, comment_content=comment_content, comment_time=comment_time)
-    md.stu_comment.objects.create(stu_id=stu_id, comment_id=comment_id)
-    md.course_comment.objects.create(course_id=course_id, comment_id=comment_id)
+    stu_item = md.stu.objects.get(stu_id=stu_id)
+    comment_item = md.comment.objects.get(comment_id=comment_id)
+    course_item = md.course.objects.get(course_id=course_id)
+    md.stu_comment.objects.create(stu_id=stu_item, comment_id=comment_item)
+    md.course_comment.objects.create(course_id=course_item, comment_id=comment_id)
     return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_id})
 
 
@@ -251,10 +259,12 @@ def delComment(request):
     stu_id = info.get('stu_id')
     course_id = info.get('course_id')
     comment_id = info.get('comment_id')
-
+    stu_item = md.stu.objects.get(stu_id=stu_id)
+    comment_item = md.comment.objects.get(comment_id=comment_id)
+    course_item = md.course.objects.get(course_id=course_id)
     md.comment.objects.filter(comment_id=comment_id).delete()
-    md.stu_comment.objects.filter(stu_id=stu_id, comment_id=comment_id).delete()
-    md.course_comment.objects.filter(course_id=course_id, comment_id=comment_id).delete()
+    md.stu_comment.objects.filter(stu_id=stu_item, comment_id=comment_item).delete()
+    md.course_comment.objects.filter(course_id=course_item, comment_id=comment_item).delete()
     return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
 
 @csrf_exempt
@@ -269,6 +279,7 @@ def newThemePost(request):
     tp_content = themePost.tp_content
     tp_time = datetime.datetime.now()
     tp_isTeacher = False
+    stu_item = md.stu.objects.get(stu_id=stu_id)
     if not tp_title:
         return JsonResponse({"code": 1, 'message': "标题不能为空！"})
     if len(tp_title) > 127:
@@ -276,15 +287,18 @@ def newThemePost(request):
     if len(tp_content) > 512:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过512个字符"})
     md.themepost.objects.create(tp_id=tp_id, tp_title=tp_title, tp_content=tp_content, tp_time=tp_time, tp_isTeacher=tp_isTeacher)
-    md.stu_tp.objects.create(stu_id=stu_id, tp_id=tp_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    md.stu_tp.objects.create(stu_id=stu_item, tp_id=tp_item)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': tp_id})
 @csrf_exempt
 def deleteThemePost(request):
     info = json.loads(request.body)
     stu_id = info.get('stu_id')
     tp_id = info.get('tp_id')
+    stu_item = md.stu.objects.get(stu_id=stu_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
     md.themepost.objects.filter(tp_id=tp_id).delete()
-    md.stu_tp.objects.filter(tp_id=tp_id, stu_id=stu_id).delete()
+    md.stu_tp.objects.filter(tp_id=tp_item, stu_id=stu_item).delete()
     return JsonResponse({"code": 0, 'prompt': "主题帖删除成功！"})
 @csrf_exempt
 def newFollowPost(request):
@@ -297,14 +311,17 @@ def newFollowPost(request):
     fp_content = info.get('fp_content')
     fp_time = datetime.datetime.now()
     fp_isTeacher = False
+    stu_item = md.stu.objects.get(stu_id=stu_id)
     if not fp_content:
         return JsonResponse({"code": 1, 'message': "内容不能为空！"})
     if len(fp_content) > 127:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过127个字符"})
-    md.themepost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
+    md.followpost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
                                 fp_isTeacher=fp_isTeacher)
-    md.stu_fp.objects.create(stu_id=stu_id, fp_id=fp_id)
-    md.tp_fp.objects.create(tp_id=tp_id, fp_id=fp_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    fp_item = md.followpost.objects.get(fp_id=fp_id)
+    md.stu_fp.objects.create(stu_id=stu_item, fp_id=fp_item)
+    md.tp_fp.objects.create(tp_id=tp_item, fp_id=fp_item)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'fp_id': fp_id})
 
 @csrf_exempt
@@ -313,9 +330,12 @@ def deleteFollowPost(request):
     stu_id = info.get('stu_id')
     tp_id = info.get('tp_id')
     fp_id = info.get('fp_id')
+    stu_item = md.stu.objects.get(stu_id=stu_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    fp_item = md.followpost.objects.get(fp_id=fp_id)
     md.followpost.objects.filter(fp_id=fp_id).delete()
-    md.stu_fp.objects.filter(fp_id=fp_id,stu_id=stu_id).delete()
-    md.tp_fp.objects.filter(fp_id=fp_id, tp_id=tp_id).delete()
+    md.stu_fp.objects.filter(fp_id=fp_item,stu_id=stu_item).delete()
+    md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
     return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
 # if __name__ == '__main__':
 #     print(datetime.datetime.now())

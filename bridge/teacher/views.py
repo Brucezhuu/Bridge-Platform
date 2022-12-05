@@ -129,10 +129,12 @@ def add(request):  # 老师新开一个课程
     course_id = course['course_id']
     course_name = course['course_name']
     exist = md.course.objects.filter(course_id=course_id)
+    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
+    course_item = md.course.objects.get(course_id=course['course_id'])
     if exist:
         res = {'code': 1, "prompt": "此课程ID已经存在，请重新设置！"}
         return JsonResponse(res)
-    exist = md.teacher_course.objects.filter(course_id=course_id, teacher_id=teacher_id)
+    exist = md.teacher_course.objects.filter(course_id=course_item, teacher_id=teacher_item)
     if exist:
         res = {'code': 2, "prompt": "您已开设了此课程，请勿重复开设！"}
         return JsonResponse(res)
@@ -142,7 +144,7 @@ def add(request):  # 老师新开一个课程
         return JsonResponse({"code": 3, 'prompt': "课程ID或课程名称或课程容量字段不得为空！"})
     md.course.objects.create(course_total=0, course_id=course_id, course_name=course_name, course_intro=course_intro,
                              course_capacity=course_capacity)
-    md.teacher_course.objects.create(teacher_id=teacher_id, course_id=course_id)
+    md.teacher_course.objects.create(teacher_id=teacher_item, course_id=course_item)
     return JsonResponse({"code": 0, 'prompt': "开课成功，可以在课程广场查看到此课程"})
 
 
@@ -151,7 +153,9 @@ def delete(request):  # 教师不再设此课
     info = json.loads(request.body)
     teacher_id = info.get('teacher_id')
     course = info.get('course')
-    md.teacher_course.objects.filter(teacher_id=teacher_id, course_id=course['course_id']).delete()
+    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
+    course_item = md.course.objects.get(course_id=course['course_id'])
+    md.teacher_course.objects.filter(teacher_id=teacher_item, course_id=course_item).delete()
     md.course.objects.filter(course_id=course['course_id']).delete()
     res = {'code': 0, "prompt": "删除课程成功！"}
     return JsonResponse(res)
@@ -180,7 +184,7 @@ def myCourse(request):
     courses = md.teacher_course.objects.filter(teacher_id=teacher_id)
     course_ids = []
     for s_c in courses:
-        course_ids.append(s_c.course_id)
+        course_ids.append(s_c.course_id.course_id)
     data = []
     for course_id in course_ids:
         obj = md.course.objects.filter(course_id=course_id).first()
@@ -225,6 +229,9 @@ def addMaterial(request):
     material_intro = material.material_intro
     teacher_id = info.get("teacher_id")
     course_id = info.get('course_id')
+    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
+    course_item = md.course.objects.get(course_id=course_id)
+
     if not material_id or not material_intro or not material_name:
         return JsonResponse({'code': 3, 'message': "所有字段必须填写！"})
     exist = md.course.objects.filter(course_id=course_id)
@@ -240,8 +247,9 @@ def addMaterial(request):
         res = {'code': 3, "prompt": "无此老师！"}
         return JsonResponse(res)
     md.material.objects.create(material_id=material_id, material_name=material_name, material_intro=material_intro)
-    md.teacher_material.objects.create(teacher_id=teacher_id, material_id=material_id)
-    md.course_material.objects.create(course_id=course_id, material_id=material_id)
+    material_item = md.material.objects.get(material_id=material_id)
+    md.teacher_material.objects.create(teacher_id=teacher_item, material_id=material_item)
+    md.course_material.objects.create(course_id=course_item, material_id=material_item)
     return JsonResponse({"code": 0, 'prompt': "添加课程资料成功！"})
 
 
@@ -257,6 +265,8 @@ def newThemePost(request):
     tp_content = themePost.tp_content
     tp_time = datetime.datetime.now()
     tp_isTeacher = True
+    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
+
     if not tp_title:
         return JsonResponse({"code": 1, 'message': "标题不能为空！"})
     if len(tp_title) > 127:
@@ -265,7 +275,8 @@ def newThemePost(request):
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过512个字符"})
     md.themepost.objects.create(tp_id=tp_id, tp_title=tp_title, tp_content=tp_content, tp_time=tp_time,
                                 tp_isTeacher=tp_isTeacher)
-    md.teacher_tp.objects.create(teacher_id=teacher_id, tp_id=tp_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    md.teacher_tp.objects.create(teacher_id=teacher_item, tp_id=tp_item)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': tp_id})
 
 
@@ -274,8 +285,10 @@ def deleteThemePost(request):
     info = json.loads(request.body)
     teacher_id = info.get('teacher_id')
     tp_id = info.get('tp_id')
+    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
     md.themepost.objects.filter(tp_id=tp_id).delete()
-    md.teacher_tp.objects.filter(tp_id=tp_id, teacher_id=teacher_id).delete()
+    md.teacher_tp.objects.filter(tp_id=tp_item, teacher_id=teacher_item).delete()
     return JsonResponse({"code": 0, 'prompt': "主题帖删除成功！"})
 
 
@@ -289,15 +302,18 @@ def newFollowPost(request):
     fp_idx = fp_idx + 1
     fp_content = info.get('fp_content')
     fp_time = datetime.datetime.now()
-    fp_isTeacher = False
+    fp_isTeacher = True
+    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
     if not fp_content:
         return JsonResponse({"code": 1, 'message': "内容不能为空！"})
     if len(fp_content) > 127:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过127个字符"})
-    md.themepost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
+    md.followpost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
                                 fp_isTeacher=fp_isTeacher)
-    md.teacher_fp.objects.create(teacher_id=teacher_id, fp_id=fp_id)
-    md.tp_fp.objects.create(tp_id=tp_id, fp_id=fp_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    fp_item = md.followpost.objects.get(fp_id=fp_id)
+    md.teacher_fp.objects.create(teacher_id=teacher_item, fp_id=fp_item)
+    md.tp_fp.objects.create(tp_id=tp_item, fp_id=fp_item)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'fp_id': fp_id})
 
 
@@ -307,8 +323,11 @@ def deleteFollowPost(request):
     teacher_id = info.get('teacher_id')
     tp_id = info.get('tp_id')
     fp_id = info.get('fp_id')
+    teacher_item = md.stu.objects.get(teacher_id=teacher_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    fp_item = md.followpost.objects.get(fp_id=fp_id)
     md.followpost.objects.filter(fp_id=fp_id).delete()
-    md.teacher_fp.objects.filter(fp_id=fp_id, teacher_id=teacher_id).delete()
-    md.tp_fp.objects.filter(fp_id=fp_id, tp_id=tp_id).delete()
+    md.teacher_fp.objects.filter(fp_id=fp_item, teacher_id=teacher_item).delete()
+    md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
     return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
 # if __name__ == '__main__':

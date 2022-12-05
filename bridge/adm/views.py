@@ -216,8 +216,11 @@ def addMaterial(request):
         res = {'code': 3, "prompt": "无此管理员！"}
         return JsonResponse(res)
     md.material.objects.create(material_id=material_id, material_name=material_name, material_intro=material_intro)
+    material_item = md.material.objects.get(material_id=material_id)
+    adm_item = md.adm.objects.get(adm_id=adm_id)
+    course_item = md.course.objects.get(course_id=course_id)
     # md.adm_material.objects.create(adm_id=adm_id, material_id=material_id)
-    md.course_material.objects.create(course_id=course_id, material_id=material_id)
+    md.course_material.objects.create(course_id=course_item, material_id=material_item)
     return JsonResponse({"code": 0, 'prompt': "添加课程资料成功！"})
 
 
@@ -241,7 +244,9 @@ def newThemePost(request):
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过512个字符"})
     md.themepost.objects.create(tp_id=tp_id, tp_title=tp_title, tp_content=tp_content, tp_time=tp_time,
                                 tp_isadm=tp_isadm)
-    md.adm_tp.objects.create(adm_id=adm_id, tp_id=tp_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    adm_item = md.adm.objects.get(adm_id=adm_id)
+    md.adm_tp.objects.create(adm_id=adm_item, tp_id=tp_item)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': tp_id})
 
 
@@ -250,8 +255,10 @@ def deleteThemePost(request):
     info = json.loads(request.body)
     adm_id = info.get('adm_id')
     tp_id = info.get('tp_id')
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    adm_item = md.adm.objects.get(adm_id=adm_id)
     md.themepost.objects.filter(tp_id=tp_id).delete()
-    md.adm_tp.objects.filter(tp_id=tp_id, adm_id=adm_id).delete()
+    md.adm_tp.objects.filter(tp_id=tp_item, adm_id=adm_item).delete()
     return JsonResponse({"code": 0, 'prompt': "主题帖删除成功！"})
 
 
@@ -266,14 +273,17 @@ def newFollowPost(request):
     fp_content = info.get('fp_content')
     fp_time = datetime.datetime.now()
     fp_isadm = False
+    adm_item = md.adm.objects.get(adm_id=adm_id)
     if not fp_content:
         return JsonResponse({"code": 1, 'message': "内容不能为空！"})
     if len(fp_content) > 127:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过127个字符"})
-    md.themepost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
+    md.followpost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
                                 fp_isadm=fp_isadm)
-    md.adm_fp.objects.create(adm_id=adm_id, fp_id=fp_id)
-    md.tp_fp.objects.create(tp_id=tp_id, fp_id=fp_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    fp_item = md.followpost.objects.get(fp_id=fp_id)
+    md.adm_fp.objects.create(adm_id=adm_item, fp_id=fp_item)
+    md.tp_fp.objects.create(tp_id=tp_item, fp_id=fp_item)
     return JsonResponse({"code": 0, 'prompt': "发表成功！", 'fp_id': fp_id})
 
 
@@ -283,8 +293,11 @@ def deleteFollowPost(request):
     adm_id = info.get('adm_id')
     tp_id = info.get('tp_id')
     fp_id = info.get('fp_id')
+    adm_item = md.adm.objects.get(adm_id=adm_id)
+    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    fp_item = md.followpost.objects.get(fp_id=fp_id)
     md.followpost.objects.filter(fp_id=fp_id).delete()
-    md.adm_fp.objects.filter(fp_id=fp_id, adm_id=adm_id).delete()
-    md.tp_fp.objects.filter(fp_id=fp_id, tp_id=tp_id).delete()
+    md.adm_fp.objects.filter(fp_id=fp_item, adm_id=adm_item).delete()
+    md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
     return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
 # if __name__ == '__main__':
