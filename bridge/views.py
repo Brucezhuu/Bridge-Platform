@@ -58,7 +58,7 @@ def showCourseComment(request):
 
     for comment_id in comment_ids:
         comment = model.comment.objects.get(comment_id=comment_id)
-        stu_item = model.stu_comment.objects.get(comment_id=comment_id)
+        stu_item = model.stu_comment.objects.get(comment_id=comment)
         stu_id = stu_item.stu_id.stu_id
         stu = model.stu.objects.get(stu_id=stu_id)
         stu_name = stu.stu_name
