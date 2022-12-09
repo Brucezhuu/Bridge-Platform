@@ -270,14 +270,16 @@ def delComment(request):
 
 @csrf_exempt
 def newThemePost(request):
+    print(request.body)
     info = json.loads(request.body)
     stu_id = info.get('stu_id')
     themePost = info.get('themepost')
+    print(info)
     global tp_idx
     tp_id = str(tp_idx + 1)
     tp_idx = tp_idx + 1
-    tp_title = themePost.tp_title
-    tp_content = themePost.tp_content
+    tp_title = themePost.get('tp_title')
+    tp_content = themePost.get("tp_content")
     tp_time = datetime.datetime.now()
     tp_isTeacher = False
     stu_item = md.stu.objects.get(stu_id=stu_id)
