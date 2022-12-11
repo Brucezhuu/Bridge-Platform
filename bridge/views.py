@@ -46,7 +46,7 @@ def searchByName(request):
 
 @csrf_exempt
 def showCourseComment(request):
-    info = json.loads(request)
+    info = json.loads(request.body)
     course_id = info.get('course_id')
     course_item = model.course.objects.get(course_id=course_id)
     course_comments = model.course_comment.objects.filter(course_id=course_item)
@@ -62,7 +62,8 @@ def showCourseComment(request):
         stu_id = stu_item.stu_id.stu_id
         stu = model.stu.objects.get(stu_id=stu_id)
         stu_name = stu.stu_name
-        data.append({"stu_id": stu.stu_id, "stu_name": stu_name, "comment_id": comment_id, "comment_content": comment.comment_content,
+        data.append({"stu_id": stu.stu_id, "stu_name": stu_name, "comment_id": comment_id,
+                     "comment_content": comment.comment_content,
                      "comment_time": comment.comment_time})
     if len(data) == 0:
         return JsonResponse({"code": 1, "data": None, "message": "此课程暂无任何评价"})
