@@ -169,9 +169,9 @@ def getinfo(request):
     email = stu.email
     phone = stu.phone
     message = stu.message
+    postCnt = stu.postCnt
     res = {"stu_id": stu_id, "stu_password": stu_password, "stu_name": stu_name,
-           "depart": depart, "email": email, "phone": phone, "message": message}
-    print(res)
+           "depart": depart, "email": email, "phone": phone, "message": message, "postCnt": postCnt}
     return JsonResponse(res)
 
 
