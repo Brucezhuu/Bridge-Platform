@@ -107,12 +107,13 @@ def showAllFp(request):
         fp_ids.append(obj.fp_id.fp_id)
     for fp_id in fp_ids:
         fp = model.followpost.objects.get(fp_id=fp_id)
-        stu_id = model.stu_fp.objects.get(fp_id=fp_id).stu_id
+        stu_item = model.stu_fp.objects.get(fp_id=fp).stu_id
+        stu_id = stu_item.stu_id
         stu_name = model.stu.objects.get(stu_id=stu_id).stu_name
         fp_content = fp.fp_content
         fp_time = fp.fp_time
         fp_isTeacher = fp.fp_isTeacher
-        data.append({"stu_id": stu_id, "stu_name": stu_name, "fp_content": fp_content, "fp_time": fp_time,
+        data.append({"fp_id": fp_id, "stu_id": stu_id, "stu_name": stu_name, "fp_content": fp_content, "fp_time": fp_time,
                      "fp_isTeacher": fp_isTeacher})
     if len(data) == 0:
         return JsonResponse({"code": 1, "data": None, "message": "此主题帖暂无任何跟帖"})

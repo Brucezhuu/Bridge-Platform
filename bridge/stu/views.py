@@ -251,7 +251,7 @@ def makeComment(request):
     comment_item = md.comment.objects.get(comment_id=comment_id)
     course_item = md.course.objects.get(course_id=course_id)
     md.stu_comment.objects.create(stu_id=stu_item, comment_id=comment_item)
-    md.course_comment.objects.create(course_id=course_item, comment_id=comment_id)
+    md.course_comment.objects.create(course_id=course_item, comment_id=comment_item)
     return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_id})
 
 
