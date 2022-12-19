@@ -238,7 +238,7 @@ def addMaterial(request):
     if not exist:
         res = {'code': 1, "prompt": "无此课程ID，请重新设置！"}
         return JsonResponse(res)
-    exist = md.teacher_course.objects.filter(course_id=course_id, teacher_id=teacher_id)
+    exist = md.teacher_course.objects.filter(course_id=course_item, teacher_id=teacher_item)
     if not exist:
         res = {'code': 2, "prompt": "无此课程开设记录！"}
         return JsonResponse(res)
@@ -266,7 +266,6 @@ def newThemePost(request):
     tp_time = datetime.datetime.now()
     tp_isTeacher = True
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
-
     if not tp_title:
         return JsonResponse({"code": 1, 'message': "标题不能为空！"})
     if len(tp_title) > 127:
@@ -325,7 +324,7 @@ def deleteFollowPost(request):
     teacher_id = info.get('teacher_id')
     tp_id = info.get('tp_id')
     fp_id = info.get('fp_id')
-    teacher_item = md.stu.objects.get(teacher_id=teacher_id)
+    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
     tp_item = md.themepost.objects.get(tp_id=tp_id)
     fp_item = md.followpost.objects.get(fp_id=fp_id)
     md.followpost.objects.filter(fp_id=fp_id).delete()
