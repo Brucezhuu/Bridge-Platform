@@ -42,6 +42,8 @@ class course(models.Model):
     course_rate = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=0)
     course_total = models.IntegerField(blank=True, null=True, default=0)
     course_capacity = models.IntegerField(default=0)
+    course_sum = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True, default=0)
+    course_cntComment = models.IntegerField(blank=True, null=True, default=0)
 
 
 class material(models.Model):

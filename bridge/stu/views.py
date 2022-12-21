@@ -241,6 +241,7 @@ def makeComment(request):
     course_id = info.get('course_id')
     comment_content = info.get('comment_content')
     comment_time = datetime.datetime.now()
+    course_rate = info.get("course_rate")
     global comment_idx
     comment_id = str(comment_idx + 1)
     comment_idx = 1 + comment_idx
@@ -252,6 +253,10 @@ def makeComment(request):
     stu_item = md.stu.objects.get(stu_id=stu_id)
     comment_item = md.comment.objects.get(comment_id=comment_id)
     course_item = md.course.objects.get(course_id=course_id)
+    course_sum = course_item.course_sum
+    course_cntComment = course_item.course_cntComment
+    course_item.objects.update(course_sum=course_sum+course_rate, course_cntComment=course_cntComment+1)
+    course_item.objects.update(course_rate=course_sum/course_cntComment)
     md.stu_comment.objects.create(stu_id=stu_item, comment_id=comment_item)
     md.course_comment.objects.create(course_id=course_item, comment_id=comment_item)
     return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_id})
