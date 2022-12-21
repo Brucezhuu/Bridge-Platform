@@ -12,7 +12,7 @@ from bridge.tools import myJWT
 comment_idx = 0
 tp_idx = 0
 fp_idx = 0
-
+material_idx = 0
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
@@ -224,15 +224,17 @@ def changePasswd(request):
 def addMaterial(request):
     info = json.loads(request.body)
     material = info.get('material')
-    material_id = material.material_id
-    material_name = material.material_name
-    material_intro = material.material_intro
+    global material_idx
+    material_id = str(material_idx + 1)
+    material_idx = material_idx + 1
+    material_name = material["material_name"]
+    material_intro = material["material_intro"]
     teacher_id = info.get("teacher_id")
     course_id = info.get('course_id')
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
     course_item = md.course.objects.get(course_id=course_id)
 
-    if not material_id or not material_intro or not material_name:
+    if not material_intro or not material_name:
         return JsonResponse({'code': 3, 'message': "所有字段必须填写！"})
     exist = md.course.objects.filter(course_id=course_id)
     if not exist:
