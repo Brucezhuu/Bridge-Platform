@@ -128,9 +128,11 @@ def add(request):  # 老师新开一个课程
     course = info.get('course')
     course_id = course['course_id']
     course_name = course['course_name']
+    course_intro = course['course_intro']
+    course_capacity = course['course_capacity']
     exist = md.course.objects.filter(course_id=course_id)
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
-    course_item = md.course.objects.get(course_id=course['course_id'])
+    course_item = md.course.objects.get(course_id=course_id)
     if exist:
         res = {'code': 1, "prompt": "此课程ID已经存在，请重新设置！"}
         return JsonResponse(res)
@@ -138,8 +140,6 @@ def add(request):  # 老师新开一个课程
     if exist:
         res = {'code': 2, "prompt": "您已开设了此课程，请勿重复开设！"}
         return JsonResponse(res)
-    course_capacity = course.course_capacity
-    course_intro = course.course_intro
     if not course_id or not course_name or not course_capacity:
         return JsonResponse({"code": 3, 'prompt': "课程ID或课程名称或课程容量字段不得为空！"})
     md.course.objects.create(course_total=0, course_id=course_id, course_name=course_name, course_intro=course_intro,
