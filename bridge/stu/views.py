@@ -194,7 +194,9 @@ def myCourse(request):
         course_rate = obj.course_rate
         course_total = obj.course_total
         course_capacity = obj.course_capacity
-        data.append({"course_id": course_id, "course_name": course_name, "course_intro": course_intro,
+        teacher_item = md.teacher_course.objects.get(course_id=course_id)
+        teacher_name = teacher_item.teacher_id.teacher_name
+        data.append({"teacher_name": teacher_name, "course_id": course_id, "course_name": course_name, "course_intro": course_intro,
                      "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
 
     if len(data) == 0:
