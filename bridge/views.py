@@ -160,9 +160,9 @@ def showAllFp(request):
         fp_ids.append(obj.fp_id.fp_id)
     for fp_id in fp_ids:
         fp = model.followpost.objects.get(fp_id=fp_id)
-        stu_item = model.stu_fp.objects.get(fp_id=fp).stu_id
+        stu_item = model.stu_fp.objects.filter(fp_id=fp).first()
         if stu_item:
-            stu_id = stu_item.stu_id
+            stu_id = stu_item.stu_id.stu_id
             stu_name = model.stu.objects.get(stu_id=stu_id).stu_name
             fp_content = fp.fp_content
             fp_time = fp.fp_time
@@ -171,16 +171,19 @@ def showAllFp(request):
                 {"fp_id": fp_id, "stu_id": stu_id, "stu_name": stu_name, "fp_content": fp_content, "fp_time": fp_time,
                  "fp_isTeacher": fp_isTeacher})
         else:
-            teacher_item = model.teacher_fp.objects.get(fp_id=fp).teacher_id
-            teacher_id = teacher_item.teacher_id
-            teacher_name = model.teacher.objects.get(teacher_id=teacher_id).teacher_name
-            fp_content = fp.fp_content
-            fp_time = fp.fp_time
-            fp_isTeacher = fp.fp_isTeacher
-            data.append(
-                {"fp_id": fp_id, "teacher_id": teacher_id, "teacher_name": teacher_name, "fp_content": fp_content,
-                 "fp_time": fp_time,
-                 "fp_isTeacher": fp_isTeacher})
+            teacher_item = model.teacher_fp.objects.filter(fp_id=fp).first()
+            if teacher_item:
+                teacher_id = teacher_item.teacher_id.teacher_id
+                teacher_name = model.teacher.objects.get(teacher_id=teacher_id).teacher_name
+                fp_content = fp.fp_content
+                fp_time = fp.fp_time
+                fp_isTeacher = fp.fp_isTeacher
+                data.append(
+                    {"fp_id": fp_id, "teacher_id": teacher_id, "teacher_name": teacher_name, "fp_content": fp_content,
+                     "fp_time": fp_time,
+                     "fp_isTeacher": fp_isTeacher})
+            else:
+                return JsonResponse({"code": 2, "data": None, "message": "未知的错误"})
     if len(data) == 0:
         return JsonResponse({"code": 1, "data": None, "message": "此主题帖暂无任何跟帖"})
     return JsonResponse({"code": 0, "data": data, "message": "找到所有跟帖！"})

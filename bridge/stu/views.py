@@ -260,7 +260,9 @@ def makeComment(request):
     # course_item.objects.update(course_rate=course_sum/course_cntComment)
     md.comment.objects.filter(course_id=course_id).update(course_sum=course_sum + course_rate,
                                                           course_cntComment=course_cntComment + 1)
-    md.comment.objects.filter(course_id=course_id).update(course_rate=course_sum / course_cntComment)
+    course_sum = course_item.course_sum
+    course_cntComment = course_item.course_cntComment
+    md.comment.objects.filter(course_id=course_id).update(course_rate=float(course_sum) / float(course_cntComment))
     md.stu_comment.objects.create(stu_id=stu_item, comment_id=comment_item)
     md.course_comment.objects.create(course_id=course_item, comment_id=comment_item)
     return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_id})
