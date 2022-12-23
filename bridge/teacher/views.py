@@ -172,8 +172,9 @@ def getinfo(request):
     email = teacher.email
     phone = teacher.phone
     message = teacher.message
+    postCnt = teacher.postCnt
     res = {"teacher_id": teacher_id, "teacher_password": teacher_password, "teacher_name": teacher_name,
-           "depart": depart, "email": email, "phone": phone, "message": message}
+           "depart": depart, "email": email, "phone": phone, "message": message, "postCnt": postCnt}
     return JsonResponse(res)
 
 
@@ -224,34 +225,34 @@ def changePasswd(request):
 def addMaterial(request):
     info = json.loads(request.body)
     material = info.get('material')
-    global material_idx
-    material_id = str(material_idx + 1)
-    material_idx = material_idx + 1
-    material_name = material["material_name"]
-    material_intro = material["material_intro"]
     teacher_id = info.get("teacher_id")
     course_id = info.get('course_id')
-    teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
-    course_item = md.course.objects.get(course_id=course_id)
-
-    if not material_intro or not material_name:
-        return JsonResponse({'code': 3, 'message': "所有字段必须填写！"})
-    exist = md.course.objects.filter(course_id=course_id)
-    if not exist:
-        res = {'code': 1, "prompt": "无此课程ID，请重新设置！"}
-        return JsonResponse(res)
-    exist = md.teacher_course.objects.filter(course_id=course_item, teacher_id=teacher_item)
-    if not exist:
-        res = {'code': 2, "prompt": "无此课程开设记录！"}
-        return JsonResponse(res)
-    exist = md.teacher.objects.filter(teacher_id=teacher_id)
-    if not exist:
-        res = {'code': 3, "prompt": "无此老师！"}
-        return JsonResponse(res)
-    md.material.objects.create(material_id=material_id, material_name=material_name, material_intro=material_intro)
-    material_item = md.material.objects.get(material_id=material_id)
-    md.teacher_material.objects.create(teacher_id=teacher_item, material_id=material_item)
-    md.course_material.objects.create(course_id=course_item, material_id=material_item)
+    for m in material:
+        global material_idx
+        material_id = str(material_idx + 1)
+        material_idx = material_idx + 1
+        material_name = m["material_name"]
+        material_intro = m["material_intro"]
+        teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
+        course_item = md.course.objects.get(course_id=course_id)
+        if not material_name:
+            return JsonResponse({'code': 3, 'message': "所有字段必须填写！"})
+        exist = md.course.objects.filter(course_id=course_id)
+        if not exist:
+            res = {'code': 1, "prompt": "无此课程ID，请重新设置！"}
+            return JsonResponse(res)
+        exist = md.teacher_course.objects.filter(course_id=course_item, teacher_id=teacher_item)
+        if not exist:
+            res = {'code': 2, "prompt": "无此课程开设记录！"}
+            return JsonResponse(res)
+        exist = md.teacher.objects.filter(teacher_id=teacher_id)
+        if not exist:
+            res = {'code': 3, "prompt": "无此老师！"}
+            return JsonResponse(res)
+        md.material.objects.create(material_id=material_id, material_name=material_name, material_intro=material_intro)
+        material_item = md.material.objects.get(material_id=material_id)
+        md.teacher_material.objects.create(teacher_id=teacher_item, material_id=material_item)
+        md.course_material.objects.create(course_id=course_item, material_id=material_item)
     return JsonResponse({"code": 0, 'prompt': "添加课程资料成功！"})
 
 
