@@ -20,7 +20,8 @@ def showAllCourse(request):
         course_capacity = obj.course_capacity
         teacher_item = model.teacher_course.objects.get(course_id=course_id)
         teacher_name = teacher_item.teacher_id.teacher_name
-        data.append({"teacher_name": teacher_name, "course_id": course_id, "course_name": course_name, "course_intro": course_intro,
+        data.append({"teacher_name": teacher_name, "course_id": course_id, "course_name": course_name,
+                     "course_intro": course_intro,
                      "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
     if len(data) == 0:
         return JsonResponse({"data": [], "message": "没有课程", 'code': 1})
@@ -98,6 +99,56 @@ def showAllTp(request):
 
 
 @csrf_exempt
+def showAllTp_stu(request):
+    info = json.loads(request.body)
+    stu_id = info.get('stu_id')
+    if not stu_id:
+        return JsonResponse({'code': 2, 'message': '学生id为空，请先登陆'})
+    stu = model.stu.objects.get(stu_id=stu_id)
+    if not stu:
+        return JsonResponse({'code': 3, 'message': '无此学生，请先注册'})
+    postCnt = stu.postCnt
+    allTp = model.themepost.objects.all()
+    data = []
+    for obj in allTp:
+        tp_id = obj.tp_id
+        tp_title = obj.tp_title
+        tp_content = obj.tp_content
+        tp_time = obj.tp_time
+        tp_isTeacher = obj.tp_isTeacher
+        data.append({"tp_id": tp_id, "tp_title": tp_title, "tp_content": tp_content, "tp_time": tp_time,
+                     "tp_isTeacher": tp_isTeacher})
+    if len(data) == 0:
+        return JsonResponse({"data": [], "message": "没有任何主题帖", 'code': 1, 'postCnt': postCnt})
+    return JsonResponse({"data": data, "message": "查找到所有主题帖", 'code': 0, 'postCnt': postCnt})
+
+
+@csrf_exempt
+def showAllTp_teacher(request):
+    info = json.loads(request.body)
+    teacher_id = info.get('teacher_id')
+    if not teacher_id:
+        return JsonResponse({'code': 2, 'message': '教工号为空，请先登陆'})
+    teacher = model.teacher.objects.get(teacher=teacher_id)
+    if not teacher:
+        return JsonResponse({'code': 3, 'message': '无此老师，请先注册'})
+    postCnt = teacher.postCnt
+    allTp = model.themepost.objects.all()
+    data = []
+    for obj in allTp:
+        tp_id = obj.tp_id
+        tp_title = obj.tp_title
+        tp_content = obj.tp_content
+        tp_time = obj.tp_time
+        tp_isTeacher = obj.tp_isTeacher
+        data.append({"tp_id": tp_id, "tp_title": tp_title, "tp_content": tp_content, "tp_time": tp_time,
+                     "tp_isTeacher": tp_isTeacher})
+    if len(data) == 0:
+        return JsonResponse({"data": [], "message": "没有任何主题帖", 'code': 1, 'postCnt': postCnt})
+    return JsonResponse({"data": data, "message": "查找到所有主题帖", 'code': 0, 'postCnt': postCnt})
+
+
+@csrf_exempt
 def showAllFp(request):
     info = json.loads(request.body)
     tp_id = info.get('tp_id')
@@ -115,8 +166,9 @@ def showAllFp(request):
         fp_content = fp.fp_content
         fp_time = fp.fp_time
         fp_isTeacher = fp.fp_isTeacher
-        data.append({"fp_id": fp_id, "stu_id": stu_id, "stu_name": stu_name, "fp_content": fp_content, "fp_time": fp_time,
-                     "fp_isTeacher": fp_isTeacher})
+        data.append(
+            {"fp_id": fp_id, "stu_id": stu_id, "stu_name": stu_name, "fp_content": fp_content, "fp_time": fp_time,
+             "fp_isTeacher": fp_isTeacher})
     if len(data) == 0:
         return JsonResponse({"code": 1, "data": None, "message": "此主题帖暂无任何跟帖"})
     return JsonResponse({"code": 0, "data": data, "message": "找到所有跟帖！"})

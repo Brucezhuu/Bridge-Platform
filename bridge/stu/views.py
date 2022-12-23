@@ -196,7 +196,8 @@ def myCourse(request):
         course_capacity = obj.course_capacity
         teacher_item = md.teacher_course.objects.get(course_id=course_id)
         teacher_name = teacher_item.teacher_id.teacher_name
-        data.append({"teacher_name": teacher_name, "course_id": course_id, "course_name": course_name, "course_intro": course_intro,
+        data.append({"teacher_name": teacher_name, "course_id": course_id, "course_name": course_name,
+                     "course_intro": course_intro,
                      "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
 
     if len(data) == 0:
@@ -255,8 +256,11 @@ def makeComment(request):
     course_item = md.course.objects.get(course_id=course_id)
     course_sum = course_item.course_sum
     course_cntComment = course_item.course_cntComment
-    course_item.objects.update(course_sum=course_sum+course_rate, course_cntComment=course_cntComment+1)
-    course_item.objects.update(course_rate=course_sum/course_cntComment)
+    # course_item.objects.update(course_sum=course_sum+course_rate, course_cntComment=course_cntComment+1)
+    # course_item.objects.update(course_rate=course_sum/course_cntComment)
+    md.comment.objects.filter(course_id=course_id).update(course_sum=course_sum + course_rate,
+                                                          course_cntComment=course_cntComment + 1)
+    md.comment.objects.filter(course_id=course_id).update(course_rate=course_sum / course_cntComment)
     md.stu_comment.objects.create(stu_id=stu_item, comment_id=comment_item)
     md.course_comment.objects.create(course_id=course_item, comment_id=comment_item)
     return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_id})

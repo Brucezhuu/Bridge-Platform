@@ -262,10 +262,10 @@ def newThemePost(request):
     teacher_id = info.get('teacher_id')
     themePost = info.get('themepost')
     global tp_idx
-    tp_id = str(tp_idx + 1)
-    tp_idx = tp_idx + 1
-    tp_title = themePost.tp_title
-    tp_content = themePost.tp_content
+    tp_id = str(tp_idx - 1)
+    tp_idx = tp_idx - 1
+    tp_title = themePost.get("tp_title")
+    tp_content = themePost("tp_content")
     tp_time = datetime.datetime.now()
     tp_isTeacher = True
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
