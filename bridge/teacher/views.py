@@ -265,7 +265,7 @@ def newThemePost(request):
     tp_id = str(tp_idx - 1)
     tp_idx = tp_idx - 1
     tp_title = themePost.get("tp_title")
-    tp_content = themePost("tp_content")
+    tp_content = themePost.get("tp_content")
     tp_time = datetime.datetime.now()
     tp_isTeacher = True
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
@@ -302,8 +302,8 @@ def newFollowPost(request):
     teacher_id = info.get('teacher_id')
     tp_id = info.get('tp_id')
     global fp_idx
-    fp_id = str(fp_idx + 1)
-    fp_idx = fp_idx + 1
+    fp_id = str(fp_idx - 1)
+    fp_idx = fp_idx - 1
     fp_content = info.get('fp_content')
     fp_time = datetime.datetime.now()
     fp_isTeacher = True
