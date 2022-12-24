@@ -47,19 +47,19 @@ class course(models.Model):
 
 
 class material(models.Model):
-    material_id = models.CharField(max_length=25, primary_key=True, unique=True)
+    # material_id = models.CharField(max_length=25, primary_key=True, unique=True)
     material_name = models.CharField(max_length=255)
     material_intro = models.CharField(max_length=255, blank=True, null=True)
 
 
 class comment(models.Model):
-    comment_id = models.CharField(max_length=25, primary_key=True, unique=True)
+    # comment_id = models.CharField(max_length=25, primary_key=True, unique=True)
     comment_content = models.CharField(max_length=255)
     comment_time = models.TimeField(auto_now_add=True, blank=True, null=True)
 
 
 class themepost(models.Model):
-    tp_id = models.CharField(primary_key=True, unique=True, max_length=25)
+    # tp_id = models.CharField(primary_key=True, unique=True, max_length=25)
     tp_title = models.CharField(max_length=127)
     tp_content = models.CharField(max_length=512, blank=True, null=True)
     tp_time = models.TimeField(auto_now_add=True, blank=True, null=True)
@@ -67,7 +67,7 @@ class themepost(models.Model):
 
 
 class followpost(models.Model):
-    fp_id = models.CharField(primary_key=True, unique=True, max_length=25)
+    # fp_id = models.CharField(primary_key=True, unique=True, max_length=25)
     fp_content = models.CharField(max_length=127)
     fp_time = models.TimeField(auto_now_add=True, blank=True, null=True)
     fp_isTeacher = models.BooleanField()

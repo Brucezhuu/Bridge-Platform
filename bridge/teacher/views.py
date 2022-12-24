@@ -7,12 +7,13 @@ from django.http import JsonResponse
 import bridge.models as md
 from bridge.tools import myJWT
 
-
 # Create your views here.
 comment_idx = 0
-tp_idx = 0
-fp_idx = 0
+# tp_idx = 0
+# fp_idx = 0
 material_idx = 0
+
+
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
@@ -228,9 +229,9 @@ def addMaterial(request):
     teacher_id = info.get("teacher_id")
     course_id = info.get('course_id')
     for m in material:
-        global material_idx
-        material_id = str(material_idx + 1)
-        material_idx = material_idx + 1
+        # global material_idx
+        # material_id = str(material_idx + 1)
+        # material_idx = material_idx + 1
         material_name = m["material_name"]
         material_intro = m["material_intro"]
         teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
@@ -249,8 +250,8 @@ def addMaterial(request):
         if not exist:
             res = {'code': 3, "prompt": "无此老师！"}
             return JsonResponse(res)
-        md.material.objects.create(material_id=material_id, material_name=material_name, material_intro=material_intro)
-        material_item = md.material.objects.get(material_id=material_id)
+        material_item = md.material.objects.create(material_name=material_name, material_intro=material_intro)
+        # material_item = md.material.objects.get(material_id=material_id)
         md.teacher_material.objects.create(teacher_id=teacher_item, material_id=material_item)
         md.course_material.objects.create(course_id=course_item, material_id=material_item)
     return JsonResponse({"code": 0, 'prompt': "添加课程资料成功！"})
@@ -261,9 +262,9 @@ def newThemePost(request):
     info = json.loads(request.body)
     teacher_id = info.get('teacher_id')
     themePost = info.get('themepost')
-    global tp_idx
-    tp_id = str(tp_idx - 1)
-    tp_idx = tp_idx - 1
+    # global tp_idx
+    # tp_id = str(tp_idx - 1)
+    # tp_idx = tp_idx - 1
     tp_title = themePost.get("tp_title")
     tp_content = themePost.get("tp_content")
     tp_time = datetime.datetime.now()
@@ -275,13 +276,15 @@ def newThemePost(request):
         return JsonResponse({"code": 2, 'message': "标题内容不能超过127个字符"})
     if len(tp_content) > 512:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过512个字符"})
-    md.themepost.objects.create(tp_id=tp_id, tp_title=tp_title, tp_content=tp_content, tp_time=tp_time,
+    tp_item = md.themepost.objects.create(#tp_id=tp_id,
+                                tp_title=tp_title, tp_content=tp_content, tp_time=tp_time,
                                 tp_isTeacher=tp_isTeacher)
-    tp_item = md.themepost.objects.get(tp_id=tp_id)
+    # tp_item = md.themepost.objects.get(tp_id=tp_id)
     md.teacher_tp.objects.create(teacher_id=teacher_item, tp_id=tp_item)
     postCnt = md.teacher.objects.get(teacher_id=teacher_id).postCnt
     md.teacher.objects.filter(teacher_id=teacher_id).update(postCnt=postCnt + 1)
-    return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': tp_id})
+    id = tp_item.id
+    return JsonResponse({"code": 0, 'prompt': "发表成功！", 'tp_id': id})
 
 
 @csrf_exempt
@@ -290,9 +293,9 @@ def deleteThemePost(request):
     teacher_id = info.get('teacher_id')
     tp_id = info.get('tp_id')
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
-    tp_item = md.themepost.objects.get(tp_id=tp_id)
-    md.themepost.objects.filter(tp_id=tp_id).delete()
-    md.teacher_tp.objects.filter(tp_id=tp_item, teacher_id=teacher_item).delete()
+    tp_item = md.themepost.objects.get(id=tp_id)
+    md.teacher_tp.objects.filter(id=tp_item, teacher_id=teacher_item).delete()
+    md.themepost.objects.filter(id=tp_id).delete()
     return JsonResponse({"code": 0, 'prompt': "主题帖删除成功！"})
 
 
@@ -301,9 +304,9 @@ def newFollowPost(request):
     info = json.loads(request.body)
     teacher_id = info.get('teacher_id')
     tp_id = info.get('tp_id')
-    global fp_idx
-    fp_id = str(fp_idx - 1)
-    fp_idx = fp_idx - 1
+    # global fp_idx
+    # fp_id = str(fp_idx - 1)
+    # fp_idx = fp_idx - 1
     fp_content = info.get('fp_content')
     fp_time = datetime.datetime.now()
     fp_isTeacher = True
@@ -312,13 +315,14 @@ def newFollowPost(request):
         return JsonResponse({"code": 1, 'message': "内容不能为空！"})
     if len(fp_content) > 127:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过127个字符"})
-    md.followpost.objects.create(fp_id=fp_id, fp_content=fp_content, fp_time=fp_time,
-                                fp_isTeacher=fp_isTeacher)
-    tp_item = md.themepost.objects.get(tp_id=tp_id)
-    fp_item = md.followpost.objects.get(fp_id=fp_id)
+    fp_item = md.followpost.objects.create(#fp_id=fp_id,
+                                 fp_content=fp_content, fp_time=fp_time,
+                                 fp_isTeacher=fp_isTeacher)
+    tp_item = md.themepost.objects.get(id=tp_id)
+    # fp_item = md.followpost.objects.get(fp_id=fp_id)
     md.teacher_fp.objects.create(teacher_id=teacher_item, fp_id=fp_item)
     md.tp_fp.objects.create(tp_id=tp_item, fp_id=fp_item)
-    return JsonResponse({"code": 0, 'prompt': "发表成功！", 'fp_id': fp_id})
+    return JsonResponse({"code": 0, 'prompt': "发表成功！", 'fp_id': fp_item.id})
 
 
 @csrf_exempt
@@ -328,10 +332,10 @@ def deleteFollowPost(request):
     tp_id = info.get('tp_id')
     fp_id = info.get('fp_id')
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
-    tp_item = md.themepost.objects.get(tp_id=tp_id)
-    fp_item = md.followpost.objects.get(fp_id=fp_id)
-    md.followpost.objects.filter(fp_id=fp_id).delete()
+    tp_item = md.themepost.objects.get(id=tp_id)
+    fp_item = md.followpost.objects.get(id=fp_id)
     md.teacher_fp.objects.filter(fp_id=fp_item, teacher_id=teacher_item).delete()
     md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
+    md.followpost.objects.filter(id=fp_id).delete()
     return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
 # if __name__ == '__main__':

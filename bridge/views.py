@@ -56,11 +56,11 @@ def showCourseComment(request):
     data = []
     comment_ids = []
     for obj in course_comments:
-        comment_id = obj.comment_id.comment_id
+        comment_id = obj.comment_id.id
         comment_ids.append(comment_id)
 
     for comment_id in comment_ids:
-        comment = model.comment.objects.get(comment_id=comment_id)
+        comment = model.comment.objects.get(id=comment_id)
         stu_item = model.stu_comment.objects.get(comment_id=comment)
         stu_id = stu_item.stu_id.stu_id
         stu = model.stu.objects.get(stu_id=stu_id)
@@ -111,7 +111,7 @@ def showAllTp_stu(request):
     allTp = model.themepost.objects.all()
     data = []
     for obj in allTp:
-        tp_id = obj.tp_id
+        tp_id = obj.id
         tp_title = obj.tp_title
         tp_content = obj.tp_content
         tp_time = obj.tp_time
@@ -136,7 +136,7 @@ def showAllTp_teacher(request):
     allTp = model.themepost.objects.all()
     data = []
     for obj in allTp:
-        tp_id = obj.tp_id
+        tp_id = obj.id
         tp_title = obj.tp_title
         tp_content = obj.tp_content
         tp_time = obj.tp_time
@@ -152,14 +152,14 @@ def showAllTp_teacher(request):
 def showAllFp(request):
     info = json.loads(request.body)
     tp_id = info.get('tp_id')
-    tp_item = model.themepost.objects.get(tp_id=tp_id)
+    tp_item = model.themepost.objects.get(id=tp_id)
     tp_fps = model.tp_fp.objects.filter(tp_id=tp_item)
     fp_ids = []
     data = []
     for obj in tp_fps:
-        fp_ids.append(obj.fp_id.fp_id)
+        fp_ids.append(obj.fp_id.id)
     for fp_id in fp_ids:
-        fp = model.followpost.objects.get(fp_id=fp_id)
+        fp = model.followpost.objects.get(id=fp_id)
         stu_item = model.stu_fp.objects.filter(fp_id=fp).first()
         if stu_item:
             stu_id = stu_item.stu_id.stu_id
@@ -196,7 +196,7 @@ def searchTp(request):
     tp = model.themepost.objects.filter(tp_title=tp_title)
     data = []
     for obj in tp:
-        tp_id = obj.tp_id
+        tp_id = obj.id
         tp_title = obj.tp_title
         tp_content = obj.tp_content
         tp_time = obj.tp_time
@@ -215,12 +215,13 @@ def showCourseMaterial(request):
     course_materials = model.course_material.objects.filter(course_id=course_id)
     material_ids = []
     for obj in course_materials:
-        material_ids.append(obj.material_id.material_id)
+        material_ids.append(obj.material_id.id)
     data = []
     for material_id in material_ids:
-        material = model.material.objects.get(material_id=material_id)
+        material = model.material.objects.get(id=material_id)
         data.append({"material_id": material_id, 'material_name': material.material_name,
                      "material_intro": material.material_intro})
+    # print(data)
     if len(data) == 0:
         return JsonResponse({'data': None, 'code': 1, 'message': "该课程暂无任何课程资料！"})
     return JsonResponse({'data': data, 'code': 0, 'message': '查找到该课程所有资料！'})
