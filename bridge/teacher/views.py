@@ -334,8 +334,12 @@ def deleteFollowPost(request):
     teacher_item = md.teacher.objects.get(teacher_id=teacher_id)
     tp_item = md.themepost.objects.get(id=tp_id)
     fp_item = md.followpost.objects.get(id=fp_id)
-    md.teacher_fp.objects.filter(fp_id=fp_item, teacher_id=teacher_item).delete()
-    md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
-    md.followpost.objects.filter(id=fp_id).delete()
-    return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
+    teacher_fp_item = md.teacher_fp.objects.filter(fp_id=fp_item, teacher_id=teacher_item)
+    if teacher_fp_item:
+        md.teacher_fp.objects.filter(fp_id=fp_item, teacher_id=teacher_item).delete()
+        md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
+        md.followpost.objects.filter(id=fp_id).delete()
+        return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
+    else :
+        return JsonResponse({"code": 1, 'prompt': "不能删除别人的评论！"})
 # if __name__ == '__main__':

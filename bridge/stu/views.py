@@ -66,27 +66,27 @@ def register(request):
         password_2 = json_obj.get('stu_password2')
         stu_name = json_obj.get('stu_realName')
         if not Id:
-            result = {'code': 10101, 'error': 'Please give me Id'}
+            result = {'code': 10101, 'prompt': 'Please give me Id'}
             return JsonResponse(result)
 
         if not email:
-            result = {'code': 10102, 'error': 'Please give me email'}
+            result = {'code': 10102, 'prompt': 'Please give me email'}
             return JsonResponse(result)
         if not stu_name:
-            result = {'code': 10106, 'error': 'Please give me email'}
+            result = {'code': 10106, 'prompt': 'Please give me email'}
             return JsonResponse(result)
 
         if not password_1 or not password_2:
-            result = {'code': 10103, 'error': 'Please give me password'}
+            result = {'code': 10103, 'prompt': 'Please give me password'}
             return JsonResponse(result)
 
         if password_1 != password_2:
-            result = {'code': 10104, 'error': 'The password is not same!'}
+            result = {'code': 10104, 'prompt': 'The password is not same!'}
             return JsonResponse(result)
         # 检查当前用户名是否可用
         old_user = md.stu.objects.filter(stu_id=Id)
         if old_user:
-            result = {'code': 10105, 'error': 'The stu_id is already existed!'}
+            result = {'code': 10105, 'prompt': 'The stu_id is already existed!'}
             return JsonResponse(result)
         # # 密码进行哈希　－　md5
         # p_m = hashlib.md5()
@@ -243,16 +243,13 @@ def makeComment(request):
     comment_content = info.get('comment_content')
     comment_time = datetime.datetime.now()
     course_rate = info.get("course_rate")
-    print(course_rate)
-    # global comment_idx
-    # comment_id = str(comment_idx + 1)
-    # comment_idx = 1 + comment_idx
+    # print(info)
     if not comment_content:
         return JsonResponse({"code": 1, 'message': "评价内容不能为空"})
     if len(comment_content) > 255:
         return JsonResponse({"code": 2, 'message': "评价内容不能超过255个字符"})
-    comment_item = md.comment.objects.create(#comment_id=comment_id,
-                              comment_content=comment_content, comment_time=comment_time)
+    comment_item = md.comment.objects.create(  # comment_id=comment_id,
+        comment_content=comment_content, comment_time=comment_time)
     stu_item = md.stu.objects.get(stu_id=stu_id)
     # comment_item = md.comment.objects.get(comment_id=comment_id)
     course_item = md.course.objects.get(course_id=course_id)
@@ -260,14 +257,14 @@ def makeComment(request):
     course_cntComment = course_item.course_cntComment + 1
     # print(course_item.course_name, course_sum, course_cntComment)
     md.course.objects.filter(course_id=course_id).update(course_sum=course_sum,
-                                                          course_cntComment=course_cntComment)
-    course_sum = course_item.course_sum
-    course_cntComment = course_item.course_cntComment
+                                                         course_cntComment=course_cntComment)
     # print(course_item.course_name, course_sum, course_cntComment)
-    md.course.objects.filter(course_id=course_id).update(course_rate=float(course_sum) / float(course_cntComment))
+    md.course.objects.filter(course_id=course_id).update(
+        course_rate=float(float(course_sum) / float(course_cntComment)))
     md.stu_comment.objects.create(stu_id=stu_item, comment_id=comment_item)
     md.course_comment.objects.create(course_id=course_item, comment_id=comment_item)
-    return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_item.id})
+    return JsonResponse({"code": 0, 'prompt': "评论成功！", 'comment_id': comment_item.id,
+                         'course_rate': float(float(course_sum) / float(course_cntComment))})
 
 
 @csrf_exempt
@@ -304,9 +301,9 @@ def newThemePost(request):
         return JsonResponse({"code": 2, 'message': "标题内容不能超过127个字符"})
     if len(tp_content) > 512:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过512个字符"})
-    tp_item = md.themepost.objects.create(#tp_id=tp_id,
-                                tp_title=tp_title, tp_content=tp_content, tp_time=tp_time,
-                                tp_isTeacher=tp_isTeacher)
+    tp_item = md.themepost.objects.create(  # tp_id=tp_id,
+        tp_title=tp_title, tp_content=tp_content, tp_time=tp_time,
+        tp_isTeacher=tp_isTeacher)
     # tp_item = md.themepost.objects.get(tp_id=tp_id)
     md.stu_tp.objects.create(stu_id=stu_item, tp_id=tp_item)
     postCnt = md.stu.objects.get(stu_id=stu_id).postCnt
@@ -342,9 +339,9 @@ def newFollowPost(request):
         return JsonResponse({"code": 1, 'message': "内容不能为空！"})
     if len(fp_content) > 127:
         return JsonResponse({"code": 3, 'message': "帖子内容不能超过127个字符"})
-    fp_item = md.followpost.objects.create(#fp_id=fp_id,
-                                 fp_content=fp_content, fp_time=fp_time,
-                                 fp_isTeacher=fp_isTeacher)
+    fp_item = md.followpost.objects.create(  # fp_id=fp_id,
+        fp_content=fp_content, fp_time=fp_time,
+        fp_isTeacher=fp_isTeacher)
     tp_item = md.themepost.objects.get(id=tp_id)
     # fp_item = md.followpost.objects.get(id=fp_id)
     md.stu_fp.objects.create(stu_id=stu_item, fp_id=fp_item)
@@ -361,9 +358,13 @@ def deleteFollowPost(request):
     stu_item = md.stu.objects.get(stu_id=stu_id)
     tp_item = md.themepost.objects.get(id=tp_id)
     fp_item = md.followpost.objects.get(id=fp_id)
-    md.followpost.objects.filter(id=fp_id).delete()
-    md.stu_fp.objects.filter(fp_id=fp_item, stu_id=stu_item).delete()
-    md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
-    return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
+    stu_fp_item = md.stu_fp.objects.filter(fp_id=fp_item, stu_id=stu_item).first()
+    if stu_fp_item:
+        md.stu_fp.objects.filter(fp_id=fp_item, stu_id=stu_item).delete()
+        md.tp_fp.objects.filter(fp_id=fp_item, tp_id=tp_item).delete()
+        md.followpost.objects.filter(id=fp_id).delete()
+        return JsonResponse({"code": 0, 'prompt': "评论删除成功！"})
+    else:
+        return JsonResponse({"code": 1, 'prompt': "不能删除别人的帖子"})
 # if __name__ == '__main__':
 #     print(datetime.datetime.now())
