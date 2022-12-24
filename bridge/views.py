@@ -22,7 +22,8 @@ def showAllCourse(request):
         teacher_name = teacher_item.teacher_id.teacher_name
         data.append({"teacher_name": teacher_name, "course_id": course_id, "course_name": course_name,
                      "course_intro": course_intro,
-                     "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity})
+                     "course_rate": course_rate, "course_total": course_total, "course_capacity": course_capacity,
+                     "course_material": []})
     if len(data) == 0:
         return JsonResponse({"data": [], "message": "没有课程", 'code': 1})
     return JsonResponse({"data": data, "message": "查找到所有课程", 'code': 0})
